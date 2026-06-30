@@ -1,4 +1,4 @@
-// PitchPulse — Cloudflare Worker. Routes + static (landing + embeddable widget); DO real-time.
+// PitchPulse - Cloudflare Worker. Routes + static (landing + embeddable widget); DO real-time.
 import { listFixtures } from './txline';
 export { MatchRoom } from './matchRoom';
 

@@ -1,4 +1,4 @@
-/* PitchPulse — self-contained embeddable live-commentary widget.
+/* PitchPulse - self-contained embeddable live-commentary widget.
    Embed:  <div id="pitchpulse" data-match="FIXTURE_ID"></div>
            <script src="https://YOURDOMAIN/pitchpulse.js"></script>  */
 (function () {
@@ -22,7 +22,7 @@
       if (seen[ev.id]) return; seen[ev.id] = 1;
       var d = document.createElement('div');
       d.className = 'pp-card ' + badgeClass(ev.type);
-      var tweet = '⚽ ' + label(ev.type) + ' — ' + ev.commentary + ' #WorldCup2026 ' + BASE;
+      var tweet = '⚽ ' + label(ev.type) + ' - ' + ev.commentary + ' #WorldCup2026 ' + BASE;
       d.innerHTML = '<div class="pp-row"><span class="pp-badge">' + label(ev.type) + '</span>' +
         '<span class="pp-score">' + esc(ev.score || '') + '</span></div>' +
         '<div class="pp-text">' + esc(ev.commentary) + '</div>' +

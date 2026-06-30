@@ -1,4 +1,4 @@
-# PitchPulse — Live Match Commentary Widget
+# PitchPulse - Live Match Commentary Widget
 ## Build Spec for Claude Code
 
 ---
@@ -68,7 +68,7 @@ pitchpulse/
 
 ---
 
-## Backend — detailed spec
+## Backend - detailed spec
 
 ### Environment variables (`.env`)
 
@@ -90,7 +90,7 @@ PORT=3001
   - `kickoff`
   - `half_time`
   - `full_time`
-  - `odds_shift` — only trigger if the implied probability of any outcome moves by ≥ 8 percentage points in a single update
+  - `odds_shift` - only trigger if the implied probability of any outcome moves by ≥ 8 percentage points in a single update
 - Emit filtered events on an internal EventEmitter for the broadcaster to pick up
 
 Refer to TxLINE docs for exact field names: https://txline.txodds.com/documentation/worldcup
@@ -128,12 +128,12 @@ Use `claude-sonnet-4-6` model, `max_tokens: 100`.
 
 ### Routes
 
-**`GET /events/:matchId`** — SSE endpoint for the widget
+**`GET /events/:matchId`** - SSE endpoint for the widget
 - Sets headers: `Content-Type: text/event-stream`, `Cache-Control: no-cache`
 - Immediately flushes the last 20 cached events to the new client
 - Keeps connection open, streams new events as they arrive
 
-**`GET /widget/:matchId`** — REST fallback
+**`GET /widget/:matchId`** - REST fallback
 - Returns JSON array of last 20 events for the match
 - Used by the widget on first load if SSE isn't supported
 
@@ -141,7 +141,7 @@ Use `claude-sonnet-4-6` model, `max_tokens: 100`.
 
 ## Widget script (`widget/pitchpulse.js`)
 
-This is the embeddable script. It must be completely self-contained — no React, no dependencies.
+This is the embeddable script. It must be completely self-contained - no React, no dependencies.
 
 ### Embed interface
 
@@ -168,7 +168,7 @@ Each card shows:
 - Match minute (e.g. "67'")
 - AI-generated one-liner commentary
 - Share button (copies tweet to clipboard):  
-  `"⚽ 67' — [commentary text] #WorldCup2026 #BRAvFRA [link to widget page]"`
+  `"⚽ 67' - [commentary text] #WorldCup2026 #BRAvFRA [link to widget page]"`
 
 ### Visual design
 
@@ -186,7 +186,7 @@ Each card shows:
 
 ## Frontend landing page (`frontend/index.html`)
 
-Keep it simple — this is for the demo, not a full product site.
+Keep it simple - this is for the demo, not a full product site.
 
 Sections:
 1. Hero: "AI commentary for every World Cup moment. Embed in 30 seconds."
@@ -206,7 +206,7 @@ Sections:
 
 Use `@solana/wallet-adapter` or a simple manual sign-in:
 - User connects wallet (Phantom etc.)
-- Signs a message: `"Sign in to PitchPulse — ${timestamp}"`
+- Signs a message: `"Sign in to PitchPulse - ${timestamp}"`
 - Backend verifies the signature, stores wallet address, issues a UUID API key
 - API key is shown once, stored in localStorage
 - Future: API key required as `?key=xxx` on the SSE endpoint (for now, open in hackathon mode)
@@ -217,7 +217,7 @@ This satisfies the TxLINE requirement: "Must use TxLINE data as a live input and
 
 ## Deployment
 
-- **Backend:** Railway, Render, or Fly.io (needs persistent SSE connections — avoid serverless)
+- **Backend:** Railway, Render, or Fly.io (needs persistent SSE connections - avoid serverless)
 - **Frontend + widget JS:** Vercel or Netlify (static)
 - Both must be live and publicly accessible for judge review
 
@@ -232,13 +232,13 @@ Suggested domain pattern:
 
 Structure the Loom/YouTube recording like this:
 
-1. **0:00–0:30** — Problem: show a generic sports site with no live commentary. "Publishers have no easy way to add live AI commentary."
-2. **0:30–1:30** — Show the live widget on the PitchPulse landing page. A real match is in progress. A goal fires — watch the AI commentary appear within 2 seconds.
-3. **1:30–2:30** — Show the backend terminal: TxLINE SSE event comes in → Claude API call → response → broadcast. Prove the data flow.
-4. **2:30–3:30** — Open a blank HTML file, paste the embed snippet, refresh the page. The widget appears and is live. This is the judge's "wow" moment.
-5. **3:30–4:00** — Click Share on a goal event. Show the copied tweet. Explain the viral loop.
-6. **4:00–4:30** — Show the Solana sign-in flow and API key generation.
-7. **4:30–5:00** — Wrap: "104 matches, 0 manual effort. Every goal, every red card, every odds swing — narrated automatically."
+1. **0:00-0:30** - Problem: show a generic sports site with no live commentary. "Publishers have no easy way to add live AI commentary."
+2. **0:30-1:30** - Show the live widget on the PitchPulse landing page. A real match is in progress. A goal fires - watch the AI commentary appear within 2 seconds.
+3. **1:30-2:30** - Show the backend terminal: TxLINE SSE event comes in → Claude API call → response → broadcast. Prove the data flow.
+4. **2:30-3:30** - Open a blank HTML file, paste the embed snippet, refresh the page. The widget appears and is live. This is the judge's "wow" moment.
+5. **3:30-4:00** - Click Share on a goal event. Show the copied tweet. Explain the viral loop.
+6. **4:00-4:30** - Show the Solana sign-in flow and API key generation.
+7. **4:30-5:00** - Wrap: "104 matches, 0 manual effort. Every goal, every red card, every odds swing - narrated automatically."
 
 ---
 
@@ -266,9 +266,9 @@ Structure the Loom/YouTube recording like this:
 
 ## Key decisions / notes for Claude Code
 
-- Keep the widget JS vanilla — no bundler needed, just a single `.js` file served as a static asset
-- The backend must support long-lived SSE connections — do not deploy to a platform that kills connections after 30s (e.g. standard Vercel serverless functions)
-- Commentary generation should be non-blocking — fire the Claude API call async, broadcast when it resolves, don't hold up the SSE stream
+- Keep the widget JS vanilla - no bundler needed, just a single `.js` file served as a static asset
+- The backend must support long-lived SSE connections - do not deploy to a platform that kills connections after 30s (e.g. standard Vercel serverless functions)
+- Commentary generation should be non-blocking - fire the Claude API call async, broadcast when it resolves, don't hold up the SSE stream
 - If TxLINE sends events faster than Claude can respond (unlikely but possible), queue them with a simple in-memory queue and process sequentially per match
 - Start with one hardcoded match ID for the demo, then generalise
-- The share tweet should include a direct link back to the widget demo page — this is the distribution flywheel
+- The share tweet should include a direct link back to the widget demo page - this is the distribution flywheel

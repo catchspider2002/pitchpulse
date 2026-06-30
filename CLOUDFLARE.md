@@ -1,4 +1,4 @@
-# PitchPulse — Cloudflare Deployment (as built)
+# PitchPulse - Cloudflare Deployment (as built)
 
 **Track:** Consumer & Fan Experiences · **Subdomain:** `pitchpulse.<domain>`
 **Live:** https://pitchpulse.catchspider2002.workers.dev · Spec: `SPEC.md` · Notes: `README.md`
@@ -11,14 +11,14 @@ The original plan used a Container running an always-on SSE consumer. **The ship
 
 | Spec component | Cloudflare (shipped) |
 |---|---|
-| `txline.js` SSE consumer + filter | `src/txline.ts` polled by the DO — scores (goals/cards/phase) + odds (odds-shift) |
-| `commentary.js` (Claude one-liner) | `src/commentary.ts` — `claude-sonnet-4-6`, deterministic fallback |
-| `broadcast.js` (clients + last-20 cache) | `MatchRoom` DO — WebSocket hibernation + 20-event cache in DO storage |
+| `txline.js` SSE consumer + filter | `src/txline.ts` polled by the DO - scores (goals/cards/phase) + odds (odds-shift) |
+| `commentary.js` (Claude one-liner) | `src/commentary.ts` - `claude-sonnet-4-6`, deterministic fallback |
+| `broadcast.js` (clients + last-20 cache) | `MatchRoom` DO - WebSocket hibernation + 20-event cache in DO storage |
 | `routes/widget.js` (`GET /widget/:id`) | Worker `GET /api/widget/:id` → DO REST catch-up |
 | `routes/events.js` (`GET /events/:id` SSE) | Worker `GET /api/events/:id` → DO WebSocket |
-| `widget/pitchpulse.js` (embeddable, vanilla) | `public/pitchpulse.js` — self-contained, derives backend from its own `src`, REST + WS, share-to-tweet, dark mode |
+| `widget/pitchpulse.js` (embeddable, vanilla) | `public/pitchpulse.js` - self-contained, derives backend from its own `src`, REST + WS, share-to-tweet, dark mode |
 | landing page (demo + embed snippet) | `public/index.html` via Workers `[assets]` |
-| Solana sign-in (API key) | not implemented (demo runs open) — add for the sign-up requirement |
+| Solana sign-in (API key) | not implemented (demo runs open) - add for the sign-up requirement |
 
 **Flow:** widget opens WS → Worker routes to the fixture's `MatchRoom` → DO alarm polls TxLINE → detects events → Claude one-liner → broadcasts to all embedded widgets.
 
@@ -42,7 +42,7 @@ tag = "v1"
 new_classes = ["MatchRoom"]
 ```
 
-Secrets: `TXLINE_API_KEY` (required), `ANTHROPIC_API_KEY` (recommended — Claude commentary).
+Secrets: `TXLINE_API_KEY` (required), `ANTHROPIC_API_KEY` (recommended - Claude commentary).
 
 ## Deploy
 

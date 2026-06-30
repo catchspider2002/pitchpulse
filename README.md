@@ -1,6 +1,6 @@
-# PitchPulse — Live Match Commentary Widget
+# PitchPulse - Live Match Commentary Widget
 
-An embeddable widget that turns TxLINE's live World Cup feed into punchy AI commentary — every goal, card, and odds swing — on any website with a single `<script>` tag. Submitted to the Superteam × TxODDS World Cup Hackathon — Consumer & Fan Experiences track.
+An embeddable widget that turns TxLINE's live World Cup feed into punchy AI commentary - every goal, card, and odds swing - on any website with a single `<script>` tag. Submitted to the Superteam × TxODDS World Cup Hackathon - Consumer & Fan Experiences track.
 
 **Stack:** Cloudflare Workers + **Durable Objects** (poll + WebSocket fan-out) + Claude + static assets. No Container.
 
@@ -34,13 +34,13 @@ wrangler secret put ANTHROPIC_API_KEY   # optional; deterministic fallback witho
 npm run deploy
 ```
 
-No D1 — event state lives in the Durable Object.
+No D1 - event state lives in the Durable Object.
 
 ## Demo
 
 1. Open the landing page, pick a match (the live widget mounts), and copy the embed snippet.
-2. Click **Goal / Red card / Odds shift** to fire a demo event — commentary appears in the widget within a second (across any page embedding that match).
-3. Paste the snippet into a blank HTML file to prove the one-tag embed works — the judge "wow" moment.
+2. Click **Goal / Red card / Odds shift** to fire a demo event - commentary appears in the widget within a second (across any page embedding that match).
+3. Paste the snippet into a blank HTML file to prove the one-tag embed works - the judge "wow" moment.
 
 For a real in-play match, the Durable Object generates commentary automatically as events happen.
 

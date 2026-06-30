@@ -2,10 +2,10 @@ name = "pitchpulse"
 main = "src/worker.ts"
 compatibility_date = "2026-01-01"
 
-# Secrets (never commit) — set with:
+# Secrets (never commit) - set with:
 #   wrangler secret put TXLINE_API_KEY
 #   wrangler secret put ANTHROPIC_API_KEY   # for the Claude commentary
-# (No Container — a MatchRoom Durable Object polls TxLINE on an alarm, generates commentary,
+# (No Container - a MatchRoom Durable Object polls TxLINE on an alarm, generates commentary,
 #  and fans out to embedded widgets over WebSocket.)
 
 # Landing page + embeddable /pitchpulse.js served from ./public.

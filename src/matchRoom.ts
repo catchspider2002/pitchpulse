@@ -1,4 +1,4 @@
-// PitchPulse — MatchRoom Durable Object. One per fixture.
+// PitchPulse - MatchRoom Durable Object. One per fixture.
 // Alarm (~15s) polls TxLINE scores + odds, detects significant events, generates a Claude
 // one-liner, caches the last 20, and broadcasts to embedded widgets over WebSocket.
 import { getState, getImplied, listFixtures, State, Implied } from './txline';

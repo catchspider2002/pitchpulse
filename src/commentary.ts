@@ -1,4 +1,4 @@
-// PitchPulse — Claude one-liner commentary per event. Deterministic fallback if no key.
+// PitchPulse - Claude one-liner commentary per event. Deterministic fallback if no key.
 const SYSTEM = `You are a sharp, witty football commentator covering the 2026 World Cup.
 When given a match event in JSON, write exactly ONE sentence of live commentary.
 
@@ -34,13 +34,13 @@ export async function commentate(apiKey: string | undefined, ev: EventInput): Pr
 
 function fallback(ev: EventInput): string {
   switch (ev.type) {
-    case 'goal': return `GOAL! ${ev.home} ${ev.score} ${ev.away} — the net ripples and the crowd erupts.`;
-    case 'red_card': return `Red card! Down to ten men — this changes everything with the score at ${ev.score}.`;
-    case 'yellow_card': return `Into the book he goes — the referee has seen enough.`;
-    case 'kickoff': return `We are underway — ${ev.home} vs ${ev.away} is live.`;
+    case 'goal': return `GOAL! ${ev.home} ${ev.score} ${ev.away} - the net ripples and the crowd erupts.`;
+    case 'red_card': return `Red card! Down to ten men - this changes everything with the score at ${ev.score}.`;
+    case 'yellow_card': return `Into the book he goes - the referee has seen enough.`;
+    case 'kickoff': return `We are underway - ${ev.home} vs ${ev.away} is live.`;
     case 'half_time': return `Half time: ${ev.home} ${ev.score} ${ev.away}. A breather before the second act.`;
     case 'full_time': return `Full time: ${ev.home} ${ev.score} ${ev.away}. That's all she wrote.`;
-    case 'odds_shift': return `The market lurches${ev.detail ? ' — ' + ev.detail : ''}; money is moving on this one.`;
-    default: return `${ev.home} ${ev.score} ${ev.away} — ${ev.type}.`;
+    case 'odds_shift': return `The market lurches${ev.detail ? ' - ' + ev.detail : ''}; money is moving on this one.`;
+    default: return `${ev.home} ${ev.score} ${ev.away} - ${ev.type}.`;
   }
 }

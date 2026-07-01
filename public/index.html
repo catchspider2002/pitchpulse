@@ -1,11 +1,16 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PitchPulse - AI commentary for every World Cup moment</title>
+  <meta name="description" content="AI commentary for every World Cup moment. Embed in 30 seconds - one script tag." />
+  <title>PitchPulse - AI Commentary for Every World Cup Moment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/styles.css" />
 </head>
+
 <body>
   <header class="topbar"><span class="brand">PitchPulse</span></header>
   <main class="wrap">
@@ -17,9 +22,14 @@
     <div class="cols">
       <section>
         <h2 class="sec">Live demo</h2>
-        <select id="match" class="input"><option value="">Loading matches…</option></select>
-        <div id="demo"><div id="pitchpulse"></div></div>
-        <p class="muted small">Pick a match. During an in-play game, commentary appears as events happen. Or trigger a demo event below.</p>
+        <select id="match" class="input">
+          <option value="">Loading matches…</option>
+        </select>
+        <div id="demo">
+          <div id="pitchpulse"></div>
+        </div>
+        <p class="muted small">Pick a match. During an in-play game, commentary appears as events happen. Or trigger a
+          demo event below.</p>
         <div class="row">
           <button class="btn" data-mock="goal">Goal</button>
           <button class="btn" data-mock="red_card">Red card</button>
@@ -70,4 +80,5 @@
     });
   </script>
 </body>
+
 </html>

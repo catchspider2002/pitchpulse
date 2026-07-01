@@ -1,18 +1,319 @@
-:root { --bg:#F9F8F6; --panel:#fff; --border:#E4E0D8; --text:#1F1D1A; --muted:#6F6A61; --accent:#5522e0; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-.topbar { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--panel); }
-.brand { font-weight: 700; }
-.wrap { max-width: 980px; margin: 0 auto; padding: 22px 18px 64px; }
-.hero h1 { font-size: 30px; margin: 8px 0 6px; }
-.sub { color: var(--muted); max-width: 640px; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 24px; }
-@media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
-.sec { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 10px; }
-.muted { color: var(--muted); } .small { font-size: 12.5px; }
-.input { width: 100%; padding: 10px 12px; border: 1px solid #C9C2B6; border-radius: 8px; font-size: 14px; margin-bottom: 12px; }
-#demo { margin: 6px 0 8px; min-height: 80px; }
-.row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-.btn { padding: 8px 14px; border-radius: 8px; border: 1px solid #C9C2B6; background: #fff; font-weight: 600; cursor: pointer; font-size: 14px; }
-.snippet { background: #0e1016; color: #e7e9ee; padding: 12px; border-radius: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; overflow-x: auto; white-space: pre; }
-.how { padding-left: 18px; color: #333; font-size: 14px; line-height: 1.7; }
+/* ============================================================
+   PitchPulse - Premium Light UI
+   Fonts: Outfit (headings) + Inter (body)
+   Theme: World Cup Gold
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap');
+
+:root {
+  --bg: #F4F2EE;
+  --bg-warm: #FAF9F7;
+  --panel: rgba(255, 255, 255, 0.72);
+  --panel-solid: #ffffff;
+  --border: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --text: #1A1A2E;
+  --text-secondary: #4A4A68;
+  --muted: #8888A4;
+  --accent: #C8911E;
+  --accent-light: #E6A817;
+  --accent-glow: rgba(200, 145, 30, 0.15);
+  --accent-surface: rgba(200, 145, 30, 0.06);
+  --gold: #E6A817;
+  --gold-light: #F5CD5A;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-glow: 0 0 0 3px var(--accent-glow);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(200, 145, 30, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(230, 168, 23, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body>* {
+  position: relative;
+  z-index: 1;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 12.5px;
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  background: linear-gradient(135deg, #A67413 0%, var(--accent) 40%, var(--gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Layout ---------- */
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+  animation: fadeUp 0.5s var(--ease-out) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  text-align: center;
+  max-width: 640px;
+  margin: 16px auto 8px;
+}
+
+.hero h1 {
+  font-size: clamp(24px, 5vw, 34px);
+  font-weight: 800;
+  margin: 0 0 10px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 50%, var(--gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sub {
+  color: var(--text-secondary);
+  font-size: 15px;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ---------- Two-column layout ---------- */
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+@media (max-width: 760px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Section headings ---------- */
+.sec {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sec::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ---------- Inputs ---------- */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg-warm);
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-glow);
+  background: #fff;
+}
+
+/* ---------- Demo area ---------- */
+#demo {
+  margin: 8px 0;
+  min-height: 80px;
+}
+
+/* ---------- Row ---------- */
+.row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  background: var(--panel-solid);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* ---------- Code snippet ---------- */
+.snippet {
+  background: #1A1A2E;
+  color: #E7E9EE;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  overflow-x: auto;
+  white-space: pre;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- How it works ---------- */
+.how {
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.how b {
+  color: var(--accent);
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .wrap {
+    padding: 20px 14px 64px;
+  }
+
+  .topbar {
+    padding: 12px 16px;
+  }
+}

@@ -7,6 +7,7 @@ export interface Env {
   MATCH_ROOM: DurableObjectNamespace;
   TXLINE_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
+  ADMIN_KEY?: string;
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
@@ -34,7 +35,10 @@ export default {
       m = path.match(/^\/api\/widget\/(\w+)$/);
       if (m && req.method === 'GET') return room(env, m[1], '/widget', req);
       m = path.match(/^\/api\/mock-event\/(\w+)$/);
-      if (m && req.method === 'POST') return room(env, m[1], '/mock', req);
+      if (m && req.method === 'POST') {
+        if (!env.ADMIN_KEY || req.headers.get('X-Admin-Key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+        return room(env, m[1], '/mock', req);
+      }
       return json({ error: 'not found' }, 404);
     } catch (e) { return json({ error: String((e as Error).message || e) }, 500); }
   },

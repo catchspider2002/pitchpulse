@@ -28,9 +28,8 @@
         <div id="demo">
           <div id="pitchpulse"></div>
         </div>
-        <p class="muted small">Pick a match. During an in-play game, commentary appears as events happen. Or trigger a
-          demo event below.</p>
-        <div class="row">
+        <p class="muted small">Pick a match. During an in-play game, commentary appears as events happen.</p>
+        <div class="row" id="demo-controls" style="display:none">
           <button class="btn" data-mock="goal">Goal</button>
           <button class="btn" data-mock="red_card">Red card</button>
           <button class="btn" data-mock="odds_shift">Odds shift</button>
@@ -75,9 +74,22 @@
       window.PitchPulse.mount(host.firstChild, id);
       document.getElementById('snippet').textContent = '<div id="pitchpulse" data-match="' + id + '"></div>\n<' + 'script src="' + BASE + '/pitchpulse.js"><' + '/script>';
     }
-    document.querySelectorAll('[data-mock]').forEach(function (b) {
-      b.addEventListener('click', function () { if (!current) { alert('Pick a match first.'); return; } fetch('/api/mock-event/' + current, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: b.getAttribute('data-mock') }) }); });
-    });
+    // Demo event buttons are admin-only: hidden for normal visitors, revealed with ?admin=KEY
+    // (stored locally). The key is sent as X-Admin-Key; the gated /api/mock-event rejects anything else.
+    (function () {
+      var u = new URL(location.href);
+      var key = u.searchParams.get('admin');
+      if (key) { try { localStorage.setItem('admin_key', key); } catch (e) {} history.replaceState(null, '', u.pathname); }
+      if (!key) { try { key = localStorage.getItem('admin_key'); } catch (e) {} }
+      if (!key) return; // controls stay hidden
+      var ctrls = document.getElementById('demo-controls'); if (ctrls) ctrls.style.display = '';
+      document.querySelectorAll('[data-mock]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (!current) { alert('Pick a match first.'); return; }
+          fetch('/api/mock-event/' + current, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key }, body: JSON.stringify({ type: b.getAttribute('data-mock') }) });
+        });
+      });
+    })();
   </script>
 </body>
 

@@ -7,7 +7,7 @@ import { commentate } from './commentary';
 const POLL_MS = 15000;
 const ODDS_SHIFT = 0.08; // 8pp implied move = an odds-shift event
 
-export interface RoomEnv { TXLINE_API_KEY?: string; ANTHROPIC_API_KEY?: string }
+export interface RoomEnv { TXLINE_API_KEY?: string; DEEPINFRA_API_KEY?: string }
 
 interface Feed { id: string; type: string; commentary: string; score: string; phase: string; ts: number; }
 
@@ -103,7 +103,7 @@ export class MatchRoom {
   }
 
   async emit(type: string, ev: { type: string; home: string; away: string; score: string; phase: string; detail?: string }): Promise<void> {
-    const commentary = await commentate(this.env.ANTHROPIC_API_KEY, ev);
+    const commentary = await commentate(this.env.DEEPINFRA_API_KEY, ev);
     const item: Feed = { id: crypto.randomUUID(), type, commentary, score: ev.score, phase: ev.phase, ts: Date.now() };
     const feed = (await this.ctx.storage.get<Feed[]>('feed')) || [];
     feed.unshift(item);

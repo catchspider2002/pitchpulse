@@ -75,7 +75,7 @@ pitchpulse/
 ```
 TXLINE_API_KEY=your_txline_key
 TXLINE_SSE_URL=https://txline.txodds.com/stream   # confirm exact URL from docs
-ANTHROPIC_API_KEY=your_anthropic_key
+DEEPINFRA_API_KEY="your_deepinfra_key"
 PORT=3001
 ```
 

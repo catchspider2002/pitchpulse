@@ -4,7 +4,7 @@ compatibility_date = "2026-01-01"
 
 # Secrets (never commit) - set with:
 #   wrangler secret put TXLINE_API_KEY
-#   wrangler secret put ANTHROPIC_API_KEY   # for the Claude commentary
+#   wrangler secret put DEEPINFRA_API_KEY   # for live commentary (DeepInfra LLM)
 #   wrangler secret put ADMIN_KEY           # gates POST /api/mock-event (+ demo buttons via ?admin=)
 # (No Container - a MatchRoom Durable Object polls TxLINE on an alarm, generates commentary,
 #  and fans out to embedded widgets over WebSocket.)

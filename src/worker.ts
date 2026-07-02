@@ -6,7 +6,7 @@ export interface Env {
   ASSETS: Fetcher;
   MATCH_ROOM: DurableObjectNamespace;
   TXLINE_API_KEY?: string;
-  ANTHROPIC_API_KEY?: string;
+  DEEPINFRA_API_KEY?: string;
   ADMIN_KEY?: string;
 }
 

@@ -1,4 +1,6 @@
-// PitchPulse - Claude one-liner commentary per event. Deterministic fallback if no key.
+// PitchPulse - DeepInfra one-liner commentary per event. Deterministic fallback if no key.
+import { chat } from './llm';
+
 const SYSTEM = `You are a sharp, witty football commentator covering the 2026 World Cup.
 When given a match event in JSON, write exactly ONE sentence of live commentary.
 
@@ -21,14 +23,8 @@ export async function commentate(apiKey: string | undefined, ev: EventInput): Pr
   const fb = fallback(ev);
   if (!apiKey) return fb;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 100, system: SYSTEM, messages: [{ role: 'user', content: JSON.stringify(ev) }] }),
-    });
-    if (!res.ok) return fb;
-    const data = await res.json() as { content?: { text?: string }[] };
-    return data.content?.[0]?.text?.trim() || fb;
+    const text = await chat(apiKey, { system: SYSTEM, user: JSON.stringify(ev), maxTokens: 100 });
+    return text || fb;
   } catch { return fb; }
 }
 

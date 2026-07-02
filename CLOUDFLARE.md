@@ -12,7 +12,7 @@ The original plan used a Container running an always-on SSE consumer. **The ship
 | Spec component | Cloudflare (shipped) |
 |---|---|
 | `txline.js` SSE consumer + filter | `src/txline.ts` polled by the DO - scores (goals/cards/phase) + odds (odds-shift) |
-| `commentary.js` (Claude one-liner) | `src/commentary.ts` - `claude-sonnet-4-6`, deterministic fallback |
+| `commentary.js` (DeepInfra one-liner) | `src/commentary.ts` + `src/llm.ts` - deterministic fallback |
 | `broadcast.js` (clients + last-20 cache) | `MatchRoom` DO - WebSocket hibernation + 20-event cache in DO storage |
 | `routes/widget.js` (`GET /widget/:id`) | Worker `GET /api/widget/:id` → DO REST catch-up |
 | `routes/events.js` (`GET /events/:id` SSE) | Worker `GET /api/events/:id` → DO WebSocket |
@@ -42,14 +42,14 @@ tag = "v1"
 new_classes = ["MatchRoom"]
 ```
 
-Secrets: `TXLINE_API_KEY` (required), `ANTHROPIC_API_KEY` (recommended - Claude commentary).
+Secrets: `TXLINE_API_KEY` (required), `DEEPINFRA_API_KEY` (recommended - live commentary).
 
 ## Deploy
 
 ```bash
 npm install && wrangler login
 wrangler secret put TXLINE_API_KEY
-wrangler secret put ANTHROPIC_API_KEY
+wrangler secret put DEEPINFRA_API_KEY
 npm run deploy
 ```
 

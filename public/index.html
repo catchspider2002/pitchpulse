@@ -62,7 +62,7 @@
     fetch('/api/matches').then(function (r) { return r.json(); }).then(function (j) {
       var sel = document.getElementById('match');
       if (j.note) { sel.innerHTML = '<option>' + j.note + '</option>'; return; }
-      // Only live or upcoming matches — drop ones that kicked off > ~2h45m ago (finished).
+      // Only live or upcoming matches - drop ones that kicked off > ~2h45m ago (finished).
       var now = Date.now(); var norm = function (t) { return t < 1e12 ? t * 1000 : t; };
       var live = (j.fixtures || []).filter(function (f) { return norm(f.startTime) >= now - 2.75 * 3600e3; }).sort(function (a, b) { return norm(a.startTime) - norm(b.startTime); });
       sel.innerHTML = '<option value="">Pick a match…</option>' + live.map(function (f) { return '<option value="' + f.fixtureId + '">' + f.home + ' vs ' + f.away + '</option>'; }).join('');

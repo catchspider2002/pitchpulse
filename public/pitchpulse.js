@@ -9,20 +9,23 @@
   injectCSS();
 
   function badgeClass(t) { return t === 'goal' ? 'pp-goal' : t === 'red_card' ? 'pp-red' : t === 'odds_shift' ? 'pp-odds' : 'pp-other'; }
-  function label(t) { return ({ goal: 'GOAL', red_card: 'RED CARD', yellow_card: 'YELLOW', kickoff: 'KICK-OFF', half_time: 'HALF TIME', full_time: 'FULL TIME', odds_shift: 'ODDS SHIFT' })[t] || t.toUpperCase(); }
+  function label(t) { return ({ goal: 'GOAL', red_card: 'RED CARD', yellow_card: 'YELLOW', substitution: 'SUB', kickoff: 'KICK-OFF', half_time: 'HALF TIME', full_time: 'FULL TIME', odds_shift: 'ODDS SHIFT' })[t] || t.toUpperCase(); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
 
   function mount(el, matchId) {
     el.classList.add('pp-widget');
     el.innerHTML = '<div class="pp-head">Live commentary</div><div class="pp-feed"></div><div class="pp-foot">Powered by <a href="' + BASE + '" target="_blank" rel="noopener">PitchPulse</a></div>';
     var feed = el.querySelector('.pp-feed');
+    var head = el.querySelector('.pp-head');
     var seen = {};
 
     function card(ev, prepend) {
       if (seen[ev.id]) return; seen[ev.id] = 1;
+      if (ev.round && head) head.textContent = 'Live commentary · ' + ev.round;
       var d = document.createElement('div');
       d.className = 'pp-card ' + badgeClass(ev.type);
       var tweet = '⚽ ' + label(ev.type) + ' - ' + ev.commentary + ' #WorldCup2026 ' + BASE;
+      // The minute now leads the commentary text ("49' - ..."), so no separate badge here.
       d.innerHTML = '<div class="pp-row"><span class="pp-badge">' + label(ev.type) + '</span>' +
         '<span class="pp-score">' + esc(ev.score || '') + '</span></div>' +
         '<div class="pp-text">' + esc(ev.commentary) + '</div>' +
@@ -59,6 +62,7 @@
       + '.pp-card.pp-goal{background:' + (dark ? '#16240f' : '#EAF3DE') + '}.pp-card.pp-red{background:' + (dark ? '#2a1414' : '#FCEBEB') + '}.pp-card.pp-odds{background:' + (dark ? '#1b1830' : '#EEEDFE') + '}'
       + '.pp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}'
       + '.pp-badge{font-size:10px;font-weight:700;letter-spacing:.05em;opacity:.8}'
+      + '.pp-min{font-size:11px;color:#8a94a6;font-variant-numeric:tabular-nums;margin-left:auto;margin-right:8px}'
       + '.pp-score{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}'
       + '.pp-text{font-size:13.5px;line-height:1.4}'
       + '.pp-share{margin-top:6px;font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid ' + (dark ? '#3a3f4a' : '#C9C2B6') + ';background:transparent;color:inherit;cursor:pointer}'

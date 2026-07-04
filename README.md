@@ -20,7 +20,7 @@ The widget is self-contained (no framework), derives the backend from its own sc
 
 ## How it works
 
-- **MatchRoom Durable Object** (`src/matchRoom.ts`): one per fixture. An ~15s alarm polls TxLINE scores + odds, detects new events (goals, cards, kickoff/half/full time, ≥8pp odds shifts), asks **DeepInfra** (`deepseek-ai/DeepSeek-V3.2`) for a one-sentence call, caches the last 20, and broadcasts to every embedded widget over WebSocket. Stops when idle / at full time.
+- **MatchRoom Durable Object** (`src/matchRoom.ts`): one per fixture. An ~15s alarm polls TxLINE scores + odds, detects new events (goals, cards, kickoff/half/full time, ≥8pp odds shifts), asks **DeepInfra** (`zai-org/GLM-5.2`) for a one-sentence call, caches the last 20, and broadcasts to every embedded widget over WebSocket. Stops when idle / at full time.
 - **Commentary** (`src/commentary.ts`): DeepInfra LLM one-liner with a deterministic fallback if no key.
 - **Worker** (`src/worker.ts`): `/api/matches`, `/api/widget/:id` (REST catch-up), `/api/events/:id` (WS), `/api/mock-event/:id` (demo), and serves the landing page + `/pitchpulse.js`.
 

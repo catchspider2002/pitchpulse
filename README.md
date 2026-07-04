@@ -4,7 +4,7 @@ An embeddable widget that turns TxLINE's live World Cup feed into punchy AI comm
 
 **Stack:** Cloudflare Workers + **Durable Objects** (poll + WebSocket fan-out) + Claude + static assets. No Container.
 
-- **Live:** https://pitchpulse.catchspider2002.workers.dev
+- **Live:** https://pitchpulse.wc26hackathon.com
 - **GitHub:** https://github.com/catchspider2002/pitchpulse
 - **Demo video:** _add link_
 - **TxLINE endpoints used:** `POST /auth/guest/start`, `GET /api/fixtures/snapshot`, `GET /api/scores/snapshot/{fixtureId}`, `GET /api/odds/snapshot/{fixtureId}`
@@ -13,7 +13,7 @@ An embeddable widget that turns TxLINE's live World Cup feed into punchy AI comm
 
 ```html
 <div id="pitchpulse" data-match="FIXTURE_ID"></div>
-<script src="https://pitchpulse.catchspider2002.workers.dev/pitchpulse.js"></script>
+<script src="https://pitchpulse.wc26hackathon.com/pitchpulse.js"></script>
 ```
 
 The widget is self-contained (no framework), derives the backend from its own script URL, catches up via REST, then streams live over WebSocket. Respects `prefers-color-scheme: dark`.

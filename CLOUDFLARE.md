@@ -1,7 +1,7 @@
 # PitchPulse - Cloudflare Deployment (as built)
 
 **Track:** Consumer & Fan Experiences · **Subdomain:** `pitchpulse.<domain>`
-**Live:** https://pitchpulse.catchspider2002.workers.dev · Spec: `SPEC.md` · Notes: `README.md`
+**Live:** https://pitchpulse.wc26hackathon.com · Spec: `SPEC.md` · Notes: `README.md`
 
 ## Architecture decision: Durable Object, NOT a Container
 

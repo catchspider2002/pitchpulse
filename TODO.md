@@ -1,7 +1,7 @@
 # PitchPulse - Submission Checklist
 
 Track: **Consumer & Fan Experiences** (Superteam × TxODDS World Cup Hackathon)
-Live: https://pitchpulse.catchspider2002.workers.dev · Repo: https://github.com/catchspider2002/pitchpulse
+Live: https://pitchpulse.wc26hackathon.com · Repo: https://github.com/catchspider2002/pitchpulse
 
 ## ✅ Done
 

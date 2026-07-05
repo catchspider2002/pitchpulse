@@ -7,9 +7,10 @@ export interface EventInput {
   type: string; home: string; away: string; score: string; phase: string;
   team?: string; player?: string; playerOut?: string; goalType?: string;
   scoreline?: string; minute?: number | null; round?: string | null; venue?: string | null; history?: string[]; detail?: string;
+  recent?: string[]; // the widget's own last few lines - so the model can vary its language
 }
 
-const OPINION_SYSTEM = `You are a witty football commentator. The factual description of this event is ALREADY written by the system. Add ONE short sentence of colour or opinion - what it means for the match, or (if "odds" is present) the market read in plain English. HARD RULES: do NOT name any player. Do NOT restate the score, the scorer, or the minute. Do NOT invent any fact - no venue, assist, technique, or events not in "history". Refer to the teams ONLY by the two names given below; never mention any other team or country. Max 20 words. Output only the sentence.`;
+const OPINION_SYSTEM = `You are a witty football commentator. The factual description of this event is ALREADY written by the system. Add ONE short sentence of colour or opinion - what it means for the match, or (if "odds" is present) the market read in plain English. HARD RULES: do NOT name any player. Do NOT restate the score, the scorer, or the minute. Do NOT invent any fact - no venue, assist, technique, or events not in "history". Do NOT call either team the hosts or the home side. "recent" contains your own previous lines: do NOT reuse their distinctive phrases or cliches (vary your vocabulary every line). Refer to the teams ONLY by the two names given below; never mention any other team or country. Max 20 words. Output only the sentence.`;
 
 export async function commentate(apiKey: string | undefined, ev: EventInput): Promise<string> {
   return finalize(ev, await body(apiKey, ev));
@@ -18,7 +19,16 @@ export async function commentate(apiKey: string | undefined, ev: EventInput): Pr
 // Prepend the minute (start of every update) and convert any em dashes to hyphens.
 function finalize(ev: EventInput, text: string): string {
   const s = String(text).replace(/—/g, '-').replace(/\s{2,}/g, ' ').trim();
-  return ev.minute != null ? `${ev.minute}' - ${s}` : s;
+  return ev.minute != null ? `${fmtMinute(ev.minute, ev.phase)}' - ${s}` : s;
+}
+
+// Stoppage-time display: a 51st-minute clock reading in the first half is 45+6', not 51'
+// (which reads as if it happened after half-time); likewise 98' in the second half is 90+8'.
+function fmtMinute(m: number, phase: string): string {
+  if ((phase === 'H1' || phase === 'HT') && m > 45) return `45+${m - 45}`;
+  if (m > 120) return `120+${m - 120}`;
+  if ((phase === 'H2' || phase === 'F') && m > 90) return `90+${m - 90}`;
+  return String(m);
 }
 
 async function body(apiKey: string | undefined, ev: EventInput): Promise<string> {
@@ -45,9 +55,13 @@ function factSentence(ev: EventInput): string {
   switch (ev.type) {
     case 'goal':
       if (ev.goalType === 'OwnGoal') return `Own goal - ${line}.`;
+      // Player name can be missing (not yet in the lineup map) - never print "undefined".
+      if (!ev.player) return `GOAL${ev.team ? ' for ' + ev.team : ''} - ${line}.`;
       return `${ev.player}${team} ${goalTypeWord(ev.goalType)} - ${line}.`;
-    case 'red_card': return `Red card for ${ev.player}${team} - ${ev.team || 'they'} down to ten at ${line}.`;
-    case 'yellow_card': return `Yellow card for ${ev.player}${team}.`;
+    case 'red_card':
+      if (!ev.player) return `Red card${ev.team ? ' for ' + ev.team : ''} - ${ev.team || 'they'} down to ten at ${line}.`;
+      return `Red card for ${ev.player}${team} - ${ev.team || 'they'} down to ten at ${line}.`;
+    case 'yellow_card': return ev.player ? `Yellow card for ${ev.player}${team}.` : `Yellow card${ev.team ? ' for ' + ev.team : ''}.`;
     case 'substitution': return `${ev.team || 'Team'} change: ${ev.player || '?'} on, ${ev.playerOut || '?'} off.`;
     case 'kickoff': return `Kick-off${at} - ${ev.home} vs ${ev.away}${ev.round ? ', ' + ev.round : ''}.`;
     case 'half_time': return `Half-time - ${line}.`;

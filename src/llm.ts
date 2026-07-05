@@ -20,6 +20,15 @@ export async function chat(
     }),
   });
   if (!res.ok) return null;
-  const data = await res.json() as { choices?: { message?: { content?: string } }[] };
-  return data.choices?.[0]?.message?.content?.trim() || null;
+  const data = await res.json() as { choices?: { message?: { content?: string }; finish_reason?: string }[] };
+  const ch = data.choices?.[0];
+  let text = ch?.message?.content?.trim() || null;
+  // finish_reason "length" = the reply was hard-clipped at max_tokens, usually mid-sentence.
+  // Keep only complete sentences; if none survived, return null so the caller falls back to
+  // the templated factual line.
+  if (text && ch?.finish_reason === 'length') {
+    const cut = Math.max(text.lastIndexOf('.'), text.lastIndexOf('!'), text.lastIndexOf('?'));
+    text = cut > 0 ? text.slice(0, cut + 1).trim() : null;
+  }
+  return text;
 }

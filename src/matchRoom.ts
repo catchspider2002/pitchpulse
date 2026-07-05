@@ -65,28 +65,73 @@ export class MatchRoom {
         const seen = new Set<number>((await this.ctx.storage.get<number[]>('seenIds')) || []);
         const firstSight = lastPhase === undefined;
 
-        // Phase transitions (kickoff / half-time / full-time).
+        // Phase transitions (kickoff / half-time / full-time). Each is announced at most ONCE per
+        // match: phase detection can flap (a poll whose snapshot momentarily lacks
+        // halftime_finalised reads as H1 again), and lastPhase alone re-announced half-time.
+        const announced = new Set<string>((await this.ctx.storage.get<string[]>('announcedPhases')) || []);
         const phaseEvts: string[] = [];
-        if (firstSight) { if (snap.phase !== 'NS') phaseEvts.push(snap.phase === 'HT' ? 'half_time' : 'kickoff'); }
+        const pushPhase = (pt: string) => { if (!announced.has(pt)) { announced.add(pt); phaseEvts.push(pt); } };
+        if (firstSight) { if (snap.phase !== 'NS') pushPhase(snap.phase === 'HT' ? 'half_time' : 'kickoff'); }
         else if (lastPhase !== snap.phase) {
-          if (snap.phase === 'H1') phaseEvts.push('kickoff');
-          else if (snap.phase === 'HT') phaseEvts.push('half_time');
-          else if (snap.phase === 'F' || snap.phase === 'FET' || snap.phase === 'FPE') phaseEvts.push('full_time');
+          if (snap.phase === 'H1') pushPhase('kickoff');
+          else if (snap.phase === 'HT') pushPhase('half_time');
+          else if (snap.phase === 'F' || snap.phase === 'FET' || snap.phase === 'FPE') pushPhase('full_time');
         }
-        for (const pt of phaseEvts) {
-          if (pt === 'full_time') finished = true;
+        await this.ctx.storage.put('announcedPhases', [...announced]);
+        // Full time is emitted LAST (after discrete events + the goal safety net below), so a
+        // goal landing in the same poll reads "GOAL ... 0-1" then "Full-time 0-1", not reversed.
+        const emitPhase = (pt: string) =>
           // Phase transitions aren't minute-stamped - the match clock is unreliable at those points
           // (resets to ~0 at full time), so don't prefix a minute.
-          await this.emit(pt, { type: pt, home: names.home, away: names.away, score, scoreline, phase: snap.phase, minute: null, round: snap.round, venue: snap.venue });
+          this.emit(pt, { type: pt, home: names.home, away: names.away, score, scoreline, phase: snap.phase, minute: null, round: snap.round, venue: snap.venue });
+        for (const pt of phaseEvts) {
+          if (pt === 'full_time') { finished = true; continue; }
+          await emitPhase(pt);
         }
+        // Once the game is finalised the feed's clock resets to ~0, so a stoppage-time card can
+        // read "1'" - suppress tiny minutes at phase F rather than print a wrong one.
+        const fixMin = (m: number | null) => (snap.phase === 'F' && m != null && m < 10 ? null : m);
+        // Cumulative goal accounting: `goalsAnnounced` counts goals we've told users about per
+        // side (baselined to the score at first sight). Stats and goal records can land in
+        // DIFFERENT polls, so per-poll diffing would double-announce; this ledger can't.
+        const curGoals = { home: snap.homeGoals, away: snap.awayGoals };
+        const prevSnap = await this.ctx.storage.get<MatchSnapshot>('last');
+        const announcedG = (await this.ctx.storage.get<{ home: number; away: number }>('goalsAnnounced'))
+          ?? { home: Number(prevSnap?.homeGoals ?? snap.homeGoals), away: Number(prevSnap?.awayGoals ?? snap.awayGoals) };
         // Discrete goal/card/sub records, de-duplicated by record Id. Baseline (no backfill) on first sight.
         for (const ev of snap.events) {
           if (seen.has(ev.id)) continue;
           seen.add(ev.id);
           if (firstSight) continue;
+          if (ev.type === 'goal' && (ev.team === 'home' || ev.team === 'away')) {
+            // Credit the side the goal counts FOR (an own goal benefits the other team).
+            const credit = ev.goalType === 'OwnGoal' ? (ev.team === 'home' ? 'away' : 'home') : ev.team;
+            // Already covered by a synthesized goal (record surfaced late) - don't announce twice.
+            if (announcedG[credit] >= curGoals[credit]) continue;
+            announcedG[credit]++;
+          }
           const team = ev.team === 'home' ? names.home : ev.team === 'away' ? names.away : undefined;
-          await this.emit(ev.type, { type: ev.type, home: names.home, away: names.away, score, scoreline, phase: snap.phase, minute: ev.minute ?? snap.minute, round: snap.round, venue: snap.venue, team, player: ev.player, playerOut: ev.playerOut, goalType: ev.goalType });
+          await this.emit(ev.type, { type: ev.type, home: names.home, away: names.away, score, scoreline, phase: snap.phase, minute: fixMin(ev.minute ?? snap.minute), round: snap.round, venue: snap.venue, team, player: ev.player, playerOut: ev.playerOut, goalType: ev.goalType });
         }
+        // Safety net: goals that never produce a 'goal' record. A penalty converted in normal
+        // play appears only as penalty_outcome (this is how BOTH bots missed France's winner v
+        // Paraguay), and a goal record can also age out of the pruned snapshot between polls.
+        // If the score is ahead of the announced ledger, synthesize the missing goal - named
+        // from an unseen scored-penalty record when one matches the side.
+        if (!firstSight) {
+          for (const sd of ['home', 'away'] as const) {
+            let missing = curGoals[sd] - announcedG[sd];
+            while (missing-- > 0) {
+              announcedG[sd]++;
+              const pen = snap.penaltyGoals.find((p) => p.team === sd && !seen.has(p.id));
+              if (pen) seen.add(pen.id);
+              const team = sd === 'home' ? names.home : names.away;
+              await this.emit('goal', { type: 'goal', home: names.home, away: names.away, score, scoreline, phase: snap.phase, minute: fixMin(pen?.minute ?? snap.minute), round: snap.round, venue: snap.venue, team, player: pen?.player, goalType: pen ? 'Penalty' : undefined });
+            }
+          }
+        }
+        await this.ctx.storage.put('goalsAnnounced', announcedG);
+        if (finished && phaseEvts.includes('full_time')) await emitPhase('full_time');
         await this.ctx.storage.put('seenIds', [...seen].slice(-300));
         await this.ctx.storage.put('lastPhase', snap.phase);
         await this.ctx.storage.put('last', snap);
@@ -111,10 +156,12 @@ export class MatchRoom {
 
   async emit(type: string, ev: Ev): Promise<void> {
     const history = (await this.ctx.storage.get<string[]>('history')) || [];
-    const commentary = await commentate(this.env.DEEPINFRA_API_KEY, { ...ev, history: history.slice(-10) });
+    const feed = (await this.ctx.storage.get<Feed[]>('feed')) || [];
+    // Feed the model its own last few lines (newest first in `feed`) so it varies its language.
+    const recent = feed.slice(0, 6).map((f) => f.commentary);
+    const commentary = await commentate(this.env.DEEPINFRA_API_KEY, { ...ev, history: history.slice(-10), recent });
     if (type !== 'odds_shift') { history.push(factLine(ev)); await this.ctx.storage.put('history', history.slice(-30)); }
     const item: Feed = { id: crypto.randomUUID(), type, commentary, score: ev.score, phase: ev.phase, minute: ev.minute ?? null, round: ev.round ?? null, ts: Date.now() };
-    const feed = (await this.ctx.storage.get<Feed[]>('feed')) || [];
     feed.unshift(item);
     await this.ctx.storage.put('feed', feed.slice(0, 20));
     this.broadcast({ type: 'event', event: item });

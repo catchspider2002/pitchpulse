@@ -77,7 +77,12 @@ export interface MatchSnapshot {
   phase: string; minute: number | null; round: string | null; venue: string | null;
   homeGoals: number; awayGoals: number; yellows: number; reds: number;
   events: RichEvent[];
+  // Scored penalties from penalty_outcome records: a penalty converted in normal play produces
+  // NO 'goal' action (seen: France's winner v Paraguay, Portugal's opener v Croatia), so the
+  // room uses these to name the scorer when the score moves without a goal record.
+  penaltyGoals: PenGoal[];
 }
+export interface PenGoal { id: number; seq: number; team?: 'home' | 'away'; player?: string; minute: number | null }
 // Venue by fixture id - TxLINE doesn't provide a stadium name, but we know the 2026 R32 host venues.
 const VENUES_2026: Record<number, string> = {
   18175983: 'Gillette Stadium, Foxborough', 18175981: 'MetLife Stadium, East Rutherford',
@@ -121,6 +126,7 @@ export async function getMatch(env: TxEnv, fixtureId: string | number): Promise<
   const side = (p: number): 'home' | 'away' | undefined => p === 1 ? (p1Home ? 'home' : 'away') : p === 2 ? (p1Home ? 'away' : 'home') : undefined;
   const minOf = (r: any): number | null => { const s = num(r?.Clock?.Seconds); return s ? Math.min(Math.floor(s / 60) + 1, 130) : null; };
   const events: RichEvent[] = [];
+  const penaltyGoals: PenGoal[] = [];
   for (const r of arr) {
     if (r?.Confirmed === false) continue; // skip provisional/unconfirmed records - TxLINE amends them into a confirmed one
     const a = String(r?.Action || ''); const d = r?.Data || {};
@@ -132,6 +138,9 @@ export async function getMatch(env: TxEnv, fixtureId: string | number): Promise<
       if (!pin) continue; // can't name the sub yet - skip (avoids "? on, ? off" and the provisional duplicate)
       events.push({ id: num(r.Id), seq: seqOf(r), type: 'substitution', team: side(num(d.Participant)), player: pin, playerOut: names.get(num(d.PlayerOutId)), minute: minOf(r) });
     }
+    else if (a === 'penalty_outcome' && String(d?.Outcome || '') === 'Scored') {
+      penaltyGoals.push({ id: num(r.Id), seq: seqOf(r), team: side(num(r.Participant)), player: names.get(num(d.PlayerId)), minute: minOf(r) });
+    }
   }
   events.sort((x, y) => x.seq - y.seq);
   // Live minute from the most recent record carrying a running clock; else timestamp estimate.
@@ -139,19 +148,24 @@ export async function getMatch(env: TxEnv, fixtureId: string | number): Promise<
   for (const r of arr) { const s = r?.Clock?.Seconds; if (s != null && (!clk || seqOf(r) > clk.seq)) clk = { seq: seqOf(r), sec: num(s) }; }
   const minute = clk ? Math.min(Math.floor(clk.sec / 60) + 1, 130) : matchMinute(arr, phase);
   const round = roundLabel(fixtureId, num(rec?.StartTime));
-  return { phase, minute, round, venue: venueOf(fixtureId), homeGoals: p1Home ? g1 : g2, awayGoals: p1Home ? g2 : g1, yellows: y1 + y2, reds: r1 + r2, events };
+  return { phase, minute, round, venue: venueOf(fixtureId), homeGoals: p1Home ? g1 : g2, awayGoals: p1Home ? g2 : g1, yellows: y1 + y2, reds: r1 + r2, events, penaltyGoals };
 }
-// Map player normativeId -> display name ("Kane, Harry" -> "Harry Kane"), from the lineups record.
-function lineupNames(arr: any[]): Map<number, string> {
-  const m = new Map<number, string>();
+// Map player id -> display name ("Kane, Harry" -> "Harry Kane"), from the lineups record.
+// Event records reference players by normativeId OR fixturePlayerId depending on the record -
+// index both (normativeId wins on a collision) so card/goal/sub names always resolve.
+function lineupNames(arr: any[]): { get(id: number): string | undefined } {
+  const byNorm = new Map<number, string>(), byFix = new Map<number, string>();
   for (const r of arr) {
     if (String(r?.Action || '') !== 'lineups' || !Array.isArray(r.Lineups)) continue;
     for (const t of r.Lineups) for (const p of (t?.lineups || [])) {
       const pl = p?.player || {};
-      if (pl.normativeId != null && pl.preferredName) m.set(Number(pl.normativeId), tidyName(String(pl.preferredName)));
+      if (!pl.preferredName) continue;
+      const name = tidyName(String(pl.preferredName));
+      if (pl.normativeId != null) byNorm.set(Number(pl.normativeId), name);
+      if (p.fixturePlayerId != null) byFix.set(Number(p.fixturePlayerId), name);
     }
   }
-  return m;
+  return { get: (id: number) => byNorm.get(id) ?? byFix.get(id) };
 }
 // TxLINE's only name field is preferredName in "Surname, Forename" order. Just reorder around the
 // single comma - non-lossy (keeps every name part, so it can't mangle compound names). Leave anything
@@ -170,7 +184,11 @@ export async function getImplied(env: TxEnv, fixtureId: string | number): Promis
   const arr = await res.json() as any[];
   if (!Array.isArray(arr)) return null;
   const cands = arr.filter((o) => Array.isArray(o.PriceNames) && o.PriceNames.length === 3 && Array.isArray(o.Pct));
-  const pick = cands.find((o) => /stable/i.test(o.Bookmaker || '') || /stable/i.test(o.SuperOddsType || '')) || cands[0];
+  // Prefer the FULL-TIME 1X2 market: in-play snapshots also carry same-shaped period markets
+  // (first-half result etc.), and picking one of those reads as nonsense (a "95% draw" logged in
+  // first-half stoppage was really the H1-result market, not the match odds).
+  const rank = (o: any) => (/1X2/i.test(o.SuperOddsType || '') ? 4 : 0) + (o.MarketPeriod ? 0 : 2) + (/stable/i.test(o.Bookmaker || '') || /stable/i.test(o.SuperOddsType || '') ? 1 : 0);
+  const pick = cands.slice().sort((a, b) => rank(b) - rank(a))[0];
   if (!pick) return null;
   const pct = (pick.Pct as string[]).map((x) => (x === 'NA' ? NaN : Number(x)));
   if (pct.some((x) => !Number.isFinite(x))) return null;

@@ -74,7 +74,7 @@ const slides = `<!doctype html><html><head><meta charset="utf-8"><style>
     <li>The widget streams every goal, card and odds swing from <b class="accent">TxLINE</b>, narrated by AI, over WebSocket</li>
     <li>Self-contained, framework-free, dark-mode aware - and every card has a one-click share</li>
   </ul>
-  <p style="margin-top:20px">${LIVE ? `<b class="accent">${esc(fx.home)} vs ${esc(fx.away)} is in play RIGHT NOW</b> - everything you're about to see is real. →` : 'Let\\'s see it on a real match. →'}</p>
+  <p style="margin-top:20px">${LIVE ? `<b class="accent">${esc(fx.home)} vs ${esc(fx.away)} is in play RIGHT NOW</b> - everything you're about to see is real. →` : `Let's see it on a real match. →`}</p>
 </div>
 
 <div class="slide" id="s4">
@@ -122,14 +122,14 @@ writeFileSync(blogPath, `<!doctype html><html><head><meta charset="utf-8"><title
   article{flex:1} h1{font-size:30px} p{line-height:1.7;font-size:16.5px;color:#44403c}
   aside{width:430px}
 </style></head><body>
-<header>⚽ Lucas' Football Blog — <i>just a fan with a website</i></header>
+<header>⚽ Lucas' Football Blog - <i>just a fan with a website</i></header>
 <div class="cols">
   <article>
     <h1>Quarter-final day: ${fx.home} vs ${fx.away}</h1>
-    <p>Huge one today. I'll be watching from the couch as always — drop your predictions in the comments.</p>
+    <p>Huge one today. I'll be watching from the couch as always - drop your predictions in the comments.</p>
     <p>I pasted two lines of HTML into this post before kickoff, and now my little blog has a live AI commentary feed
     running next to this article. That's the entire integration. Two lines.</p>
-    <p>Enjoy the match — allez les bleus / dima maghreb, whichever side you're on.</p>
+    <p>Enjoy the match - allez les bleus / dima maghreb, whichever side you're on.</p>
   </article>
   <aside>
     <div id="pitchpulse" data-match="${fx.fixtureId}"></div>
@@ -185,7 +185,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForSelector(`#match option[value="${fx.fixtureId}"]`, { state: 'attached' });
 await cap(LIVE ? `${fx.home} vs ${fx.away} is LIVE right now - let's mount the widget on it` : 'Pick a match and the widget mounts', 4200);
 await page.selectOption('#match', String(fx.fixtureId));
-await page.waitForSelector('.pp-widget .pp-card', { timeout: 30000 }).catch(() => {});
+await page.waitForSelector('.pp-widget .pp-card', { timeout: 30000 }).catch(() => { });
 await sleep(1500);
 await cap('Real commentary from the live match - every card was written by the AI as the moment happened', 5000);
 await cap('The facts (score, minute, event) come verified from TxLINE; the AI only adds the colour', 4800);
@@ -194,7 +194,7 @@ await cap('Each card has one-click share - fans post the moment straight to X', 
 // The judge moment: same widget, someone else's website, one script tag.
 await cap('Now the real pitch: this widget goes on ANY website. Here is a plain fan blog…', 3600);
 await page.goto('file://' + blogPath, { waitUntil: 'load' });
-await page.waitForSelector('.pp-widget .pp-card', { timeout: 30000 }).catch(() => {});
+await page.waitForSelector('.pp-widget .pp-card', { timeout: 30000 }).catch(() => { });
 await sleep(1200);
 await cap('Two lines of HTML pasted into the page - and the same live AI commentary is running on this blog', 5200);
 await cap('Every site embedding this match gets each new moment at the same instant, over WebSocket', 4600);

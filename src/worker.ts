@@ -39,6 +39,12 @@ export default {
         if (!env.ADMIN_KEY || req.headers.get('X-Admin-Key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
         return room(env, m[1], '/mock', req);
       }
+      // TEMP (demo recording): wipe a room's cached feed/state. Remove after use.
+      m = path.match(/^\/api\/reset\/(\w+)$/);
+      if (m && req.method === 'POST') {
+        if (!env.ADMIN_KEY || req.headers.get('X-Admin-Key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+        return room(env, m[1], '/reset', req);
+      }
       return json({ error: 'not found' }, 404);
     } catch (e) { return json({ error: String((e as Error).message || e) }, 500); }
   },

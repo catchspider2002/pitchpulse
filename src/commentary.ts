@@ -38,7 +38,7 @@ async function body(apiKey: string | undefined, ev: EventInput): Promise<string>
     // The model never sees player names (can't echo a wrong one) and is pinned to the two real teams.
     const noNames = { ...ev, player: undefined, playerOut: undefined };
     const sys = `${OPINION_SYSTEM}\nThe only two teams in this match are "${ev.home}" and "${ev.away}".`;
-    const c = await chat(apiKey, { system: sys, user: JSON.stringify(noNames), maxTokens: 90 });
+    const c = await chat(apiKey, { system: sys, user: JSON.stringify(noNames), maxTokens: 800 }); // GLM's hidden reasoning counts against max_tokens; 90 risked empty output
     return c ? `${fact} ${c.trim()}` : fact;
   } catch { return fact; }
 }

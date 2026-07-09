@@ -32,6 +32,11 @@ export class MatchRoom {
       const feed = (await this.ctx.storage.get<Feed[]>('feed')) || [];
       return new Response(JSON.stringify({ events: feed }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     }
+    // TEMP (demo recording): wipe this room's cached state. Remove after use.
+    if (url.pathname === '/reset' && req.method === 'POST') {
+      await this.ctx.storage.deleteAll();
+      return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+    }
     if (url.pathname === '/mock' && req.method === 'POST') {
       const b = await req.json().catch(() => ({})) as { type?: string; detail?: string };
       const names = await this.names();

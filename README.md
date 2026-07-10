@@ -6,7 +6,7 @@ An embeddable widget that turns TxLINE's live World Cup feed into punchy AI comm
 
 - **Live:** https://pitchpulse.wc26hackathon.com
 - **GitHub:** https://github.com/catchspider2002/pitchpulse
-- **Demo video:** _add link_
+- **Demo video:** https://youtu.be/qanHN9W0J_c
 - **TxLINE endpoints used:** `POST /auth/guest/start`, `GET /api/fixtures/snapshot`, `GET /api/scores/snapshot/{fixtureId}`, `GET /api/odds/snapshot/{fixtureId}`
 
 ## Embed

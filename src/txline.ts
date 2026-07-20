@@ -171,6 +171,9 @@ function lineupNames(arr: any[]): { get(id: number): string | undefined } {
 // single comma - non-lossy (keeps every name part, so it can't mangle compound names). Leave anything
 // without exactly one comma (mononyms like "Neymar") untouched.
 function tidyName(n: string): string {
+  // The feed disambiguates duplicate names with a birth year, e.g. "James (1999), Reece" -
+  // that's feed bookkeeping, not part of the name.
+  n = n.replace(/\s*\((19|20)\d{2}\)/g, '');
   const c = n.split(',');
   if (c.length !== 2) return n.trim();
   const surname = c[0].trim(), forename = c[1].trim();
